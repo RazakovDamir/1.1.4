@@ -13,7 +13,7 @@ public interface UserService {
 
     void removeUserById(long id);
 
-    List<User> getAllUsers();
+    List<User> getAllUsers() throws ClassNotFoundException;
 
     void cleanUsersTable();
 }
