@@ -10,13 +10,27 @@ public class Util {
     private static final String USER = "root";
     private static final String PASSWORD = "password";
 
-    public static Connection getConnection() throws SQLException {
-        Connection connection = null;
-        try{
-            connection = DriverManager.getConnection(URL,USER,PASSWORD);
+
+    private Util(){}
+
+
+    private static Connection connection;
+
+    public static Connection getConnection() {
+        boolean closedConection = true;
+        try {
+            if (connection != null) {
+                closedConection = connection.isClosed();
+            }
         } catch (SQLException e) {
-            System.out.println("Connection failed");
             e.printStackTrace();
+        }
+        if (connection == null || closedConection) {
+            try {
+                connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return connection;
     }
