@@ -2,17 +2,10 @@ package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Environment;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import static jm.task.core.jdbc.util.Util.getSessionFactory;
 
 
 public class UserDaoHibernateImpl implements UserDao {
@@ -34,12 +27,12 @@ public class UserDaoHibernateImpl implements UserDao {
                     "  PRIMARY KEY (`id`),\n" +
                     "  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE)").addEntity(User.class).executeUpdate();
             tr.commit();
-        } catch (Exception e) {
-            if (tr != null) {
-                tr.rollback();
-            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         } finally {
-            session.close();
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
@@ -50,12 +43,12 @@ public class UserDaoHibernateImpl implements UserDao {
         try {
             session.createSQLQuery("Drop table if exists users_db.users").executeUpdate();
             tr.commit();
-        } catch (Exception e) {
-            if (tr != null) {
-                tr.rollback();
-            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         } finally {
-            session.close();
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
@@ -67,12 +60,12 @@ public class UserDaoHibernateImpl implements UserDao {
             User user = new User(name, lastName, age);
             session.save(user);
             tr.commit();
-        } catch (Exception e) {
-            if (tr != null) {
-                tr.rollback();
-            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         } finally {
-            session.close();
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
@@ -85,12 +78,12 @@ public class UserDaoHibernateImpl implements UserDao {
             user.setId(id);
             session.delete(user);
             tr.commit();
-        } catch (Exception e) {
-            if (tr != null) {
-                tr.rollback();
-            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         } finally {
-            session.close();
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
@@ -101,12 +94,12 @@ public class UserDaoHibernateImpl implements UserDao {
         List<User> userList = new ArrayList<>();
         try {
             userList  = session.createSQLQuery("SELECT * FROM users").list();
-        } catch (Exception e) {
-            if (tr != null) {
-                tr.rollback();
-            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         } finally {
-            session.close();
+            if (session != null) {
+                session.close();
+            }
         }
         return userList;
     }
@@ -118,45 +111,13 @@ public class UserDaoHibernateImpl implements UserDao {
         try {
             session.createSQLQuery("DELETE FROM users;").executeUpdate();
             tr.commit();
-        } catch (Exception e) {
-            if (tr != null) {
-                tr.rollback();
-            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         } finally {
-            session.close();
-        }
-    }
-
-
-    private static StandardServiceRegistry standardServiceRegistry;
-    private static SessionFactory sessionFactory;
-
-    private static final String URL = "jdbc:mysql://localhost:3306/CoreTaskTemplate";
-    private static final String USER = "root";
-    private static final String PASSWORD = "password";
-
-    public static SessionFactory getSessionFactory() {
-        if (sessionFactory == null) {
-            try {
-
-                StandardServiceRegistryBuilder rB = new StandardServiceRegistryBuilder();
-
-                Map<String, String> settingsMap = new HashMap<>();
-                settingsMap.put(Environment.URL, URL);
-                settingsMap.put(Environment.USER, USER);
-                settingsMap.put(Environment.PASS, PASSWORD);
-
-                rB.applySettings(settingsMap);
-                standardServiceRegistry = rB.build();
-
-                MetadataSources mS = new MetadataSources(standardServiceRegistry).addAnnotatedClass(User.class);
-
-                sessionFactory = mS.buildMetadata().buildSessionFactory();
-
-            } catch (Exception e) {
-                StandardServiceRegistryBuilder.destroy(standardServiceRegistry);
+            if (session != null) {
+                session.close();
             }
         }
-        return sessionFactory;
     }
+
 }
