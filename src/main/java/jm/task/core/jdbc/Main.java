@@ -1,12 +1,6 @@
 package jm.task.core.jdbc;
 
-import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.service.UserServiceImpl;
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Environment;
 
 import java.util.HashMap;
 import java.util.Map;

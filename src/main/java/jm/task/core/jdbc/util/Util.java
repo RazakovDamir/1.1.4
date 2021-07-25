@@ -5,75 +5,95 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.service.ServiceRegistry;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.sql.Statement;
+import java.util.Properties;
 
 public class Util {
     // реализуйте настройку соеденения с БД
     private static final String URL = "jdbc:mysql://localhost:3306/CoreTaskTemplate";
     private static final String USER = "root";
     private static final String PASSWORD = "password";
+    private Connection conn = null;
+    private Statement stmt = null;
+
+    public String getURL() {
+        return URL;
+    }
+
+    public String getUSERNAME() {
+        return USER;
+    }
+
+    public String getPASSWORD() {
+        return PASSWORD;
+    }
+
+    public Connection getConnection() {
+        return conn;
+    }
+
+    public Statement getStatement() {
+        return stmt;
+    }
+
+    public void setConnection(Connection conn) {
+        this.conn = conn;
+    }
+
+    public void setStatement(Statement stmt) {
+        this.stmt = stmt;
+    }
+
 
     private static Connection connection = null;
 
-    private Util() {
+    public Util() {
         if (connection != null) {
             throw new IllegalStateException("Already instantiated");
         }
     }
 
-    public static Connection getConnection() {
-        boolean connectionClosed = true;
-        try {
-            if (connection != null) {
-                connectionClosed = connection.isClosed();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        if (connection == null || connectionClosed) {
-            try {
-                connection = DriverManager
-                        .getConnection(URL, USER, PASSWORD);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return connection;
-    }
-
-    private static StandardServiceRegistry standardServiceRegistry;
     private static SessionFactory sessionFactory;
-
     public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             try {
+                Configuration configuration = new Configuration();
+                Properties settings = new Properties();
+                settings.put(Environment.DRIVER, "com.mysql.cj.jdbc.Driver");
+                settings.put(Environment.URL, "jdbc:mysql://localhost/my_db");
+                settings.put(Environment.USER, "root");
+                settings.put(Environment.PASS, "root");
+                settings.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
 
-                StandardServiceRegistryBuilder rB = new StandardServiceRegistryBuilder();
+                settings.put(Environment.SHOW_SQL, "true");
 
-                Map<String, String> settingsMap = new HashMap<>();
-                settingsMap.put(Environment.URL, URL);
-                settingsMap.put(Environment.USER, USER);
-                settingsMap.put(Environment.PASS, PASSWORD);
+                settings.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
 
-                rB.applySettings(settingsMap);
-                standardServiceRegistry = rB.build();
+                settings.put(Environment.HBM2DDL_AUTO, "create-drop");
 
-                MetadataSources mS = new MetadataSources(standardServiceRegistry).addAnnotatedClass(User.class);
+                configuration.setProperties(settings);
 
-                sessionFactory = mS.buildMetadata().buildSessionFactory();
+                configuration.addAnnotatedClass(User.class);
 
+                ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                        .applySettings(configuration.getProperties()).build();
+
+                sessionFactory = configuration.buildSessionFactory(serviceRegistry);
             } catch (Exception e) {
-                StandardServiceRegistryBuilder.destroy(standardServiceRegistry);
+                e.printStackTrace();
             }
         }
         return sessionFactory;
     }
+
 }
 
